@@ -44,18 +44,26 @@ function App() {
       // Construct the event stream URL with query parameters
       const myESurl = `${apiUrl}?manifestURL=${encodeURIComponent(manifestUrl)}&ocr=${ocrEnabled}&pctSize=${size/100}`
       // const myAPIcall = `${apiUrl}?manifestURL=${encodeURIComponent(manifestUrl)}&ocr=${ocrEnabled}`:
-
+      let totalImages = 0;
+      let downloadedImages = 0;
       //const response = await fetch(myAPIcall);
       const es = new EventSource(myESurl);
       es.onmessage = (event) => {
         // console.log("Received event:", event.data);
-        if (event.data.startsWith("pdfurl:")) {
+        if (event.data.startsWith("imgtotal:")) {
+          // If the event data starts with "imgtotal:", it indicates the total number of images
+          totalImages = parseInt(event.data.substring(9), 10);
+          setStatus(`Downloading images... 0/${totalImages}`);
+        } else if (event.data.startsWith("imgdownloaded:")) {
+          downloadedImages++;
+          setStatus(`Downloading images... ${downloadedImages}/${totalImages}`);
+        } else if (event.data.startsWith("pdfurl:")) {
           downloadFileFromEventStream(event.data.substring(7));
-        }
-        else if (event.data === "Process completed.") {
-          //setStatus("Download complete!");
+        } else if (event.data === "close") {
           es.close();
-        } else {
+        } else if (event.data.indexOf(":") == -1) {
+          // If the event data contains a colon, it should be handled above
+          // Otherwise, treat it as a status update
           setStatus(event.data);
         }
       };
@@ -71,7 +79,7 @@ function App() {
         const baseUrl = `${apiUrlTypedAsUrl.protocol}//${apiUrlTypedAsUrl.host}`;
         pdfUrl = baseUrl + pdfUrl;
 
-        // Get the PDF URL returned by the event stream
+        // Get the PDF from the URL returned by the event stream
         fetch(pdfUrl).then((response) => {
           if (!response.ok) {
             throw new Error("Failed to download the PDF");
@@ -178,7 +186,7 @@ function App() {
             </div>
             <br></br>
             <div className="flex items-center justify-between">
-              <label htmlFor="ocr" className="text-sm font-medium text-gray-700">
+              <label htmlFor="ocr" className="text-sm font-medium text-gray-700 cursor-pointer">
                 Enable OCR
               </label>
               <div className="relative inline-block w-12 mr-2 align-middle select-none">
@@ -187,15 +195,15 @@ function App() {
                   id="ocr"
                   checked={ocrEnabled}
                   onChange={() => setOcrEnabled(!ocrEnabled)}
-                  className="sr-only"
+                  className="sr-only cursor-pointer"
                 />
                 <div
-                  className={`block h-6 rounded-full w-12 ${ocrEnabled ? "bg-emerald-500" : "bg-gray-300"
+                  className={`cursor-pointer block h-6 rounded-full w-12 ${ocrEnabled ? "bg-emerald-500" : "bg-gray-300"
                     } transition-colors duration-200`}
                   onClick={() => setOcrEnabled(!ocrEnabled)}
                 ></div>
                 <div
-                  className={`absolute left-1 top-1 bg-white border-2 rounded-full h-4 w-4 transition-transform duration-200 transform ${ocrEnabled ? "translate-x-6 border-emerald-500" : "translate-x-0 border-gray-300"
+                  className={`cursor-pointer absolute left-1 top-1 bg-white border-2 rounded-full h-4 w-4 transition-transform duration-200 transform ${ocrEnabled ? "translate-x-6 border-emerald-500" : "translate-x-0 border-gray-300"
                     }`}
                   onClick={() => setOcrEnabled(!ocrEnabled)}
                 ></div>
