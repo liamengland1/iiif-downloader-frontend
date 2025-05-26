@@ -30,7 +30,7 @@ function App() {
     try {
 
       // get env variable
-      const apiUrl = import.meta.env.VITE_BACKEND || "http://localhost:8000/iiif"
+      const apiUrl = import.meta.env.VITE_BACKEND || "http://localhost:8000/iiif2"
       let manifestUrl = url
 
       if (url.startsWith("https://dlg.usg.edu/") && !url.includes("/presentation/manifest.json")) {
