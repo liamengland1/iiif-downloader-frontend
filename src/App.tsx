@@ -42,7 +42,7 @@ function App() {
       }
 
       // Construct the event stream URL with query parameters
-      const myESurl = `${apiUrl}?manifestURL=${encodeURIComponent(manifestUrl)}&ocr=${ocrEnabled}&pctSize=${size/100}`
+      const myESurl = `${apiUrl}?manifestURL=${encodeURIComponent(manifestUrl)}&ocr=${ocrEnabled}&pctSize=${size / 100}`
       // const myAPIcall = `${apiUrl}?manifestURL=${encodeURIComponent(manifestUrl)}&ocr=${ocrEnabled}`:
       let totalImages = 0;
       let downloadedImages = 0;
@@ -133,7 +133,7 @@ function App() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred")
       setStatus(null)
-    } 
+    }
   }
 
   return (<>
@@ -210,10 +210,15 @@ function App() {
               </div>
             </div>
             <div className="text-xs text-gray-500 mt-1">
-              {ocrEnabled
-                ? "OCR will extract text from the image, making the PDF searchable."
-                : "OCR is disabled. The PDF will not be searchable."}
+              {ocrEnabled ? (
+                <>
+                  OCR will extract text from the image, making the PDF searchable. <b>This can take a few minutes for long (20+ pages) documents.</b> Please be patient.
+                </>
+              ) : (
+                "OCR is disabled. The PDF will not be searchable."
+              )}
             </div>
+
 
             <button
               type="submit"
